@@ -1220,6 +1220,21 @@ fun GameEngineCanvas(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(
                     onClick = {
+                        gameState = gameState.copy(isPaused = !gameState.isPaused)
+                    },
+                    modifier = Modifier
+                        .padding(end = 4.dp)
+                        .testTag("pause_game_button")
+                ) {
+                    Icon(
+                        imageVector = if (gameState.isPaused) Icons.Default.PlayArrow else Icons.Default.Pause,
+                        contentDescription = "Pause Toggle",
+                        tint = Color.White
+                    )
+                }
+
+                IconButton(
+                    onClick = {
                         isMuted = SoundManager.toggleMute()
                     },
                     modifier = Modifier.padding(end = 8.dp)
@@ -1263,6 +1278,88 @@ fun GameEngineCanvas(
                     GameTemplateType.TOP_DOWN_SHOOTER -> "Drag / Tap to move & shoot enemies"
                 }
                 Text(text = tip, color = Color.White, fontSize = 14.sp)
+            }
+        }
+
+        // Pause Overlay Screen Modal
+        AnimatedVisibility(
+            visible = gameState.isPaused && !gameState.isGameOver,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.85f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth(0.85f)
+                        .padding(24.dp),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF1E293B))
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .padding(24.dp)
+                            .fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Text(
+                            text = "⏸️ GAME PAUSED",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+
+                        Text(
+                            text = "Current Score",
+                            color = Color.Gray,
+                            fontSize = 14.sp
+                        )
+
+                        Text(
+                            text = "${gameState.score}",
+                            fontSize = 38.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = Color(0xFF22D3EE)
+                        )
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Button(
+                                onClick = {
+                                    gameState = gameState.copy(isPaused = false)
+                                },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .testTag("resume_game_button"),
+                                colors = ButtonDefaults.buttonColors(containerColor = config.primaryColor)
+                            ) {
+                                Icon(Icons.Default.PlayArrow, contentDescription = "Resume")
+                                Spacer(Modifier.width(6.dp))
+                                Text("Resume")
+                            }
+
+                            OutlinedButton(
+                                onClick = {
+                                    resetGame()
+                                },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .testTag("restart_paused_game_button")
+                            ) {
+                                Icon(Icons.Default.Refresh, contentDescription = "Restart")
+                                Spacer(Modifier.width(6.dp))
+                                Text("Restart")
+                            }
+                        }
+                    }
+                }
             }
         }
 

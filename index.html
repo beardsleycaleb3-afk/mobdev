@@ -208,6 +208,50 @@
       border: 1px solid #334155;
       color: #38BDF8;
     }
+    .pause-btn {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid #334155;
+      color: #E2E8F0;
+      padding: 6px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      pointer-events: auto;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .pause-btn:active {
+      transform: scale(0.92);
+    }
+    .pause-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+    }
+    .pause-menu {
+      background: #1E293B;
+      border: 1px solid #334155;
+      padding: 24px 32px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-width: 220px;
+    }
+    .pause-menu h2 {
+      color: #EADDFF;
+      font-size: 1.25rem;
+    }
+    .pause-menu p {
+      color: #94A3B8;
+      font-size: 0.9rem;
+    }
     footer {
       width: 100%;
       padding: 12px;
@@ -228,7 +272,18 @@
   <div class="game-container">
     <div class="hud">
       <div class="score-badge" id="scoreDisplay">Score: 0</div>
-      <div id="livesDisplay">❤️❤️❤️</div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <div id="livesDisplay">❤️❤️❤️</div>
+        <button class="pause-btn" id="pauseBtn" onclick="togglePause()" title="Pause Game">⏸️</button>
+      </div>
+    </div>
+    <div class="pause-overlay" id="pauseOverlay" style="display: none;">
+      <div class="pause-menu">
+        <h2>⏸️ GAME PAUSED</h2>
+        <p id="pauseMenuInfo">Current Score: 0</p>
+        <button class="btn" onclick="togglePause()">▶️ Resume</button>
+        <button class="btn btn-secondary" onclick="restartGame()">🔄 Restart</button>
+      </div>
     </div>
     <canvas id="gameCanvas"></canvas>
   </div>
@@ -323,6 +378,30 @@
     let currentMode = 'RUNNER';
     let score = 0;
     let lives = 3;
+    let isPaused = false;
+
+    function togglePause() {
+      isPaused = !isPaused;
+      const overlay = document.getElementById('pauseOverlay');
+      const pauseBtn = document.getElementById('pauseBtn');
+      const info = document.getElementById('pauseMenuInfo');
+      
+      if (isPaused) {
+        if (overlay) overlay.style.display = 'flex';
+        if (pauseBtn) pauseBtn.innerText = '▶️';
+        if (info) info.innerText = `Current Score: ${score}`;
+      } else {
+        if (overlay) overlay.style.display = 'none';
+        if (pauseBtn) pauseBtn.innerText = '⏸️';
+      }
+    }
+
+    function restartGame() {
+      if (isPaused) {
+        togglePause();
+      }
+      selectTemplate(currentMode);
+    }
 
     // Leaderboard State & Management
     let activeTabMode = 'RUNNER';
@@ -429,6 +508,9 @@
     }
 
     function selectTemplate(mode) {
+      if (isPaused) {
+        togglePause();
+      }
       if (score > 0) {
         saveScore(currentMode, score);
       }
@@ -451,6 +533,7 @@
     }
 
     canvas.addEventListener('click', (e) => {
+      if (isPaused) return;
       const rect = canvas.getBoundingClientRect();
       const x = (e.clientX - rect.left) * (width / rect.width);
       const y = (e.clientY - rect.top) * (height / rect.height);
@@ -480,6 +563,10 @@
 
     // Game Loop
     function loop() {
+      if (isPaused) {
+        requestAnimationFrame(loop);
+        return;
+      }
       ctx.fillStyle = '#0F172A';
       ctx.fillRect(0, 0, width, height);
 
