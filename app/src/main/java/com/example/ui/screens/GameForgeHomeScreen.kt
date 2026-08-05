@@ -79,6 +79,21 @@ fun GameForgeHomeScreen(
                         NavigationBarItem(
                             selected = selectedTab == 2,
                             onClick = { viewModel.setTab(2) },
+                            icon = { Icon(Icons.Default.Language, contentDescription = "Web PWA") },
+                            label = { Text("Web PWA", fontSize = 11.sp) },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = PolishOnPrimaryContainer,
+                                unselectedIconColor = PolishTextSecondary,
+                                selectedTextColor = PolishOnPrimaryContainer,
+                                unselectedTextColor = PolishTextSecondary,
+                                indicatorColor = PolishPrimaryContainer
+                            ),
+                            modifier = Modifier.testTag("tab_pwa")
+                        )
+
+                        NavigationBarItem(
+                            selected = selectedTab == 3,
+                            onClick = { viewModel.setTab(3) },
                             icon = { Icon(Icons.Default.AutoAwesome, contentDescription = "AI Architect") },
                             label = { Text("AI Studio", fontSize = 11.sp) },
                             colors = NavigationBarItemDefaults.colors(
@@ -92,8 +107,8 @@ fun GameForgeHomeScreen(
                         )
 
                         NavigationBarItem(
-                            selected = selectedTab == 3,
-                            onClick = { viewModel.setTab(3) },
+                            selected = selectedTab == 4,
+                            onClick = { viewModel.setTab(4) },
                             icon = { Icon(Icons.Default.EmojiEvents, contentDescription = "Stats") },
                             label = { Text("Stats", fontSize = 11.sp) },
                             colors = NavigationBarItemDefaults.colors(
@@ -117,8 +132,9 @@ fun GameForgeHomeScreen(
                 when (selectedTab) {
                     0 -> ForgeCreatorScreen(viewModel = viewModel)
                     1 -> ArcadeLibraryScreen(viewModel = viewModel)
-                    2 -> GeminiStudioScreen(viewModel = viewModel)
-                    3 -> StatsScreen(viewModel = viewModel)
+                    2 -> PwaWebViewScreen()
+                    3 -> GeminiStudioScreen(viewModel = viewModel)
+                    4 -> StatsScreen(viewModel = viewModel)
                 }
             }
         }
