@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>mobdev - GameForge PWA Builder</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#6750A4">
+  <meta name="description" content="mobdev GameForge PWA Mobile Arcade & Creator Engine">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    body {
+      background-color: #0F172A;
+      color: #F8FAFC;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      align-items: center;
+      justify-content: space-between;
+    }
+    header {
+      width: 100%;
+      background: #1E293B;
+      padding: 16px;
+      text-align: center;
+      border-bottom: 1px solid #334155;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    header h1 {
+      font-size: 1.4rem;
+      color: #EADDFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    header p {
+      font-size: 0.8rem;
+      color: #94A3B8;
+      margin-top: 4px;
+    }
+    .game-container {
+      position: relative;
+      width: 100%;
+      max-width: 480px;
+      height: 600px;
+      background: #020617;
+      border-radius: 16px;
+      overflow: hidden;
+      margin: 16px 0;
+      border: 2px solid #334155;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      width: 100%;
+      max-width: 480px;
+      padding: 0 16px 16px 16px;
+      justify-content: center;
+    }
+    .leaderboard-container {
+      width: 100%;
+      max-width: 480px;
+      background: #1E293B;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 16px;
+      margin: 0 16px 16px 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    .leaderboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .leaderboard-title {
+      font-size: 1rem;
+      font-weight: bold;
+      color: #EADDFF;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .leaderboard-tabs {
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      margin-bottom: 12px;
+    }
+    .tab-btn {
+      background: #334155;
+      color: #94A3B8;
+      border: none;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .tab-btn.active {
+      background: #6750A4;
+      color: #FFFFFF;
+      font-weight: bold;
+    }
+    .leaderboard-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .leaderboard-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #0F172A;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      border: 1px solid #1E293B;
+    }
+    .rank-badge {
+      font-weight: bold;
+      width: 24px;
+      height: 24px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: #334155;
+      color: #E2E8F0;
+      font-size: 0.75rem;
+      margin-right: 8px;
+    }
+    .rank-1 { background: #F59E0B; color: #000; }
+    .rank-2 { background: #94A3B8; color: #000; }
+    .rank-3 { background: #B45309; color: #FFF; }
+    .score-val {
+      font-weight: bold;
+      color: #38BDF8;
+    }
+    .clear-btn {
+      background: transparent;
+      border: 1px solid #475569;
+      color: #94A3B8;
+      padding: 2px 8px;
+      border-radius: 8px;
+      font-size: 0.7rem;
+      cursor: pointer;
+    }
+    .clear-btn:hover {
+      color: #F43F5E;
+      border-color: #F43F5E;
+    }
+    .btn {
+      background: #6750A4;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn:active {
+      transform: scale(0.96);
+    }
+    .btn-secondary {
+      background: #334155;
+      color: #E2E8F0;
+    }
+    .hud {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      right: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+      font-weight: bold;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+      pointer-events: none;
+    }
+    .score-badge {
+      background: rgba(15, 23, 42, 0.8);
+      padding: 6px 12px;
+      border-radius: 12px;
+      border: 1px solid #334155;
+      color: #38BDF8;
+    }
+    footer {
+      width: 100%;
+      padding: 12px;
+      text-align: center;
+      font-size: 0.75rem;
+      color: #64748B;
+      background: #0F172A;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>🕹️ mobdev GameForge PWA</h1>
+    <p>Mobile Game Creator Engine & Arcade Studio</p>
+  </header>
+
+  <div class="game-container">
+    <div class="hud">
+      <div class="score-badge" id="scoreDisplay">Score: 0</div>
+      <div id="livesDisplay">❤️❤️❤️</div>
+    </div>
+    <canvas id="gameCanvas"></canvas>
+  </div>
+
+  <div class="controls">
+    <button class="btn" onclick="selectTemplate('RUNNER')">🏃 Runner</button>
+    <button class="btn" onclick="selectTemplate('PUZZLE')">🧩 Puzzle</button>
+    <button class="btn" onclick="selectTemplate('TOP_DOWN')">🕹️ Top-Down</button>
+    <button class="btn btn-secondary" onclick="selectTemplate('BREAKOUT')">🧱 Breakout</button>
+    <button class="btn btn-secondary" onclick="selectTemplate('SHOOTER')">🚀 Shooter</button>
+    <button class="btn btn-secondary" onclick="toggleAudio()" id="audioBtn">🔊 Audio: ON</button>
+  </div>
+
+  <div class="leaderboard-container">
+    <div class="leaderboard-header">
+      <div class="leaderboard-title">🏆 High Scores (Top 5)</div>
+      <button class="clear-btn" onclick="resetLeaderboard()">Clear</button>
+    </div>
+    <div class="leaderboard-tabs" id="leaderboardTabs">
+      <button class="tab-btn active" onclick="switchLeaderboardTab('RUNNER')">Runner</button>
+      <button class="tab-btn" onclick="switchLeaderboardTab('PUZZLE')">Puzzle</button>
+      <button class="tab-btn" onclick="switchLeaderboardTab('TOP_DOWN')">Top-Down</button>
+      <button class="tab-btn" onclick="switchLeaderboardTab('BREAKOUT')">Breakout</button>
+      <button class="tab-btn" onclick="switchLeaderboardTab('SHOOTER')">Shooter</button>
+    </div>
+    <ul class="leaderboard-list" id="leaderboardList">
+      <!-- Populated via JS -->
+    </ul>
+  </div>
+
+  <footer>
+    mobdev PWA Engine • Web Audio Sound Synth & Offline PWA Ready
+  </footer>
+
+  <script>
+    // PWA Service Worker Registration
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('SW registered:', reg.scope))
+          .catch(err => console.log('SW registration failed:', err));
+      });
+    }
+
+    // Web Audio Synthesizer Engine
+    let audioCtx = null;
+    let audioEnabled = true;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playTone(freqStart, freqEnd, duration, type = 'sine') {
+      if (!audioEnabled) return;
+      initAudio();
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freqStart, audioCtx.currentTime);
+        if (freqEnd !== freqStart) {
+          osc.frequency.exponentialRampToValueAtTime(freqEnd, audioCtx.currentTime + duration);
+        }
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    function soundJump() { playTone(250, 600, 0.12, 'sine'); }
+    function soundShoot() { playTone(800, 200, 0.1, 'square'); }
+    function soundScore() { playTone(600, 1200, 0.15, 'sine'); }
+    function soundPop() { playTone(400, 800, 0.08, 'sine'); }
+    function soundHit() { playTone(200, 50, 0.18, 'sawtooth'); }
+
+    function toggleAudio() {
+      audioEnabled = !audioEnabled;
+      document.getElementById('audioBtn').innerText = audioEnabled ? '🔊 Audio: ON' : '🔇 Audio: OFF';
+    }
+
+    // HTML5 Canvas Game Engine Logic
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    let width = canvas.width = 480;
+    let height = canvas.height = 600;
+
+    let currentMode = 'RUNNER';
+    let score = 0;
+    let lives = 3;
+
+    // Leaderboard State & Management
+    let activeTabMode = 'RUNNER';
+
+    function getLeaderboardData() {
+      try {
+        const data = localStorage.getItem('mobdev_leaderboard');
+        if (data) return JSON.parse(data);
+      } catch(e) {}
+      return {
+        'RUNNER': [150, 120, 90, 60, 30],
+        'PUZZLE': [200, 160, 120, 80, 40],
+        'TOP_DOWN': [250, 175, 125, 75, 25],
+        'BREAKOUT': [180, 140, 100, 60, 20],
+        'SHOOTER': [220, 170, 110, 70, 30]
+      };
+    }
+
+    function saveScore(mode, scoreVal) {
+      if (!scoreVal || scoreVal <= 0) return;
+      const data = getLeaderboardData();
+      if (!data[mode]) data[mode] = [];
+      data[mode].push(scoreVal);
+      data[mode].sort((a, b) => b - a);
+      data[mode] = data[mode].slice(0, 5); // Keep top 5
+      try {
+        localStorage.setItem('mobdev_leaderboard', JSON.stringify(data));
+      } catch(e) {}
+      renderLeaderboard();
+    }
+
+    function switchLeaderboardTab(mode) {
+      activeTabMode = mode;
+      const tabs = document.querySelectorAll('#leaderboardTabs .tab-btn');
+      tabs.forEach(btn => {
+        const btnText = btn.innerText.toUpperCase().replace('-', '_');
+        if (btnText.includes(mode.replace('TOP_DOWN', 'TOP'))) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+      renderLeaderboard();
+    }
+
+    function renderLeaderboard() {
+      const listEl = document.getElementById('leaderboardList');
+      if (!listEl) return;
+      const data = getLeaderboardData();
+      const scores = data[activeTabMode] || [];
+      
+      listEl.innerHTML = '';
+      if (scores.length === 0) {
+        listEl.innerHTML = '<li class="leaderboard-item" style="color:#64748B;">No high scores yet! Play a game to set one.</li>';
+        return;
+      }
+
+      scores.forEach((sc, idx) => {
+        const rankClass = idx === 0 ? 'rank-1' : (idx === 1 ? 'rank-2' : (idx === 2 ? 'rank-3' : ''));
+        const medal = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : `#${idx + 1}`));
+        const li = document.createElement('li');
+        li.className = 'leaderboard-item';
+        li.innerHTML = `
+          <div>
+            <span class="rank-badge ${rankClass}">${medal}</span>
+            <span>Player Score</span>
+          </div>
+          <span class="score-val">${sc} pts</span>
+        `;
+        listEl.appendChild(li);
+      });
+    }
+
+    function resetLeaderboard() {
+      if (confirm('Clear local high scores?')) {
+        try {
+          localStorage.removeItem('mobdev_leaderboard');
+        } catch(e) {}
+        renderLeaderboard();
+      }
+    }
+
+    // Runner State
+    let runnerPlayerY = 450;
+    let runnerVy = 0;
+    let runnerObs = [];
+
+    // Top-Down State
+    let tdPlayer = { x: 240, y: 300 };
+    let tdBullets = [];
+    let tdEnemies = [];
+
+    // Puzzle State
+    let puzzleGrid = [];
+    const puzzleColors = ['#F43F5E', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6'];
+
+    function initPuzzle() {
+      puzzleGrid = [];
+      for (let r = 0; r < 4; r++) {
+        for (let c = 0; c < 4; c++) {
+          puzzleGrid.push({ row: r, col: c, color: Math.floor(Math.random() * puzzleColors.length) });
+        }
+      }
+    }
+
+    function selectTemplate(mode) {
+      if (score > 0) {
+        saveScore(currentMode, score);
+      }
+      currentMode = mode;
+      score = 0;
+      lives = 3;
+      runnerPlayerY = 450;
+      runnerObs = [];
+      tdBullets = [];
+      tdEnemies = [];
+      if (mode === 'PUZZLE') initPuzzle();
+      soundScore();
+      updateHud();
+      switchLeaderboardTab(mode);
+    }
+
+    function updateHud() {
+      document.getElementById('scoreDisplay').innerText = `Score: ${score}`;
+      document.getElementById('livesDisplay').innerText = '❤️'.repeat(Math.max(0, lives));
+    }
+
+    canvas.addEventListener('click', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = (e.clientX - rect.left) * (width / rect.width);
+      const y = (e.clientY - rect.top) * (height / rect.height);
+
+      if (currentMode === 'RUNNER') {
+        if (runnerPlayerY >= 450) {
+          runnerVy = -12;
+          soundJump();
+        }
+      } else if (currentMode === 'TOP_DOWN') {
+        tdBullets.push({ x: tdPlayer.x, y: tdPlayer.y, vy: -10 });
+        soundShoot();
+      } else if (currentMode === 'PUZZLE') {
+        const size = 80;
+        const startX = (width - 320) / 2;
+        const startY = (height - 320) / 2;
+        const c = Math.floor((x - startX) / size);
+        const r = Math.floor((y - startY) / size);
+        if (r >= 0 && r < 4 && c >= 0 && c < 4) {
+          score += 20;
+          soundPop();
+          initPuzzle();
+          updateHud();
+        }
+      }
+    });
+
+    // Game Loop
+    function loop() {
+      ctx.fillStyle = '#0F172A';
+      ctx.fillRect(0, 0, width, height);
+
+      // Grid
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+      for (let x = 0; x < width; x += 40) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
+      }
+
+      if (currentMode === 'RUNNER') {
+        runnerVy += 0.6;
+        runnerPlayerY += runnerVy;
+        if (runnerPlayerY >= 450) runnerPlayerY = 450;
+
+        // Ground
+        ctx.fillStyle = '#6750A4';
+        ctx.fillRect(0, 490, width, 10);
+
+        // Player
+        ctx.fillStyle = '#38BDF8';
+        ctx.beginPath();
+        ctx.arc(100, runnerPlayerY, 20, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Obstacles
+        if (Math.random() < 0.02 && runnerObs.length < 3) {
+          runnerObs.push({ x: width, y: 450 });
+        }
+        for (let i = runnerObs.length - 1; i >= 0; i--) {
+          let o = runnerObs[i];
+          o.x -= 5;
+          ctx.fillStyle = '#F43F5E';
+          ctx.fillRect(o.x, o.y - 30, 30, 30);
+
+          if (Math.abs(o.x - 100) < 25 && Math.abs(o.y - 15 - runnerPlayerY) < 25) {
+            soundHit();
+            lives--;
+            runnerObs.splice(i, 1);
+            if (lives <= 0) {
+              if (score > 0) saveScore(currentMode, score);
+              setTimeout(() => { alert(`Game Over! Final Score: ${score}`); selectTemplate(currentMode); }, 100);
+            }
+            updateHud();
+          } else if (o.x < -30) {
+            runnerObs.splice(i, 1);
+            score += 10;
+            updateHud();
+          }
+        }
+      } else if (currentMode === 'TOP_DOWN') {
+        // Player
+        ctx.fillStyle = '#6750A4';
+        ctx.beginPath();
+        ctx.arc(tdPlayer.x, tdPlayer.y, 20, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Bullets
+        for (let i = tdBullets.length - 1; i >= 0; i--) {
+          let b = tdBullets[i];
+          b.y += b.vy;
+          ctx.fillStyle = '#38BDF8';
+          ctx.beginPath(); ctx.arc(b.x, b.y, 5, 0, Math.PI * 2); ctx.fill();
+          if (b.y < 0) tdBullets.splice(i, 1);
+        }
+
+        // Enemies
+        if (Math.random() < 0.03 && tdEnemies.length < 5) {
+          tdEnemies.push({ x: Math.random() * width, y: -20, vy: 3 });
+        }
+        for (let i = tdEnemies.length - 1; i >= 0; i--) {
+          let e = tdEnemies[i];
+          e.y += e.vy;
+          ctx.fillStyle = '#EC4899';
+          ctx.beginPath(); ctx.arc(e.x, e.y, 18, 0, Math.PI * 2); ctx.fill();
+
+          // Bullet hits
+          for (let j = tdBullets.length - 1; j >= 0; j--) {
+            let b = tdBullets[j];
+            if (Math.hypot(b.x - e.x, b.y - e.y) < 20) {
+              soundScore();
+              score += 25;
+              tdEnemies.splice(i, 1);
+              tdBullets.splice(j, 1);
+              updateHud();
+              break;
+            }
+          }
+        }
+      } else if (currentMode === 'PUZZLE') {
+        const size = 70;
+        const startX = (width - 300) / 2;
+        const startY = (height - 300) / 2;
+        puzzleGrid.forEach(tile => {
+          const tx = startX + tile.col * 75;
+          const ty = startY + tile.row * 75;
+          ctx.fillStyle = puzzleColors[tile.color];
+          ctx.beginPath();
+          ctx.roundRect(tx, ty, size, size, 12);
+          ctx.fill();
+        });
+      }
+
+      requestAnimationFrame(loop);
+    }
+
+    renderLeaderboard();
+    loop();
+  </script>
+</body>
+</html>

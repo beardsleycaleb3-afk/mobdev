@@ -1,0 +1,6 @@
+{
+  "name": "GameForge",
+  "description": "Mobile AI game creator and interactive multi-genre game physics engine.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
